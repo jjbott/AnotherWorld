@@ -1,0 +1,49 @@
+<html>
+
+<head>
+    <style>
+        body {
+            background: #FFFFFF
+        }
+
+        .screen {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen {
+            width: 320px;
+            height: 200px;
+            padding: 0;
+            margin: 0;
+            border: solid black 1px;
+        }
+
+        .polygon {
+            position: absolute;
+        }
+
+        .point {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+        }
+    </style>
+    <style id="palette">
+    </style>
+</head>
+
+<body>
+    <div id="currentScreen" class="screen" style="transform: scale(4);left: 483px;top: 300px;"></div>
+
+    <div id="page0" class="screen" style="left: 1290px;top: -200px;"></div>
+    <div id="page1" class="screen" style="left: 1290px;top: -201px;"></div>
+    <div id="page2" class="screen" style="left: 1290px;top: -202px;"></div>
+    <div id="page3" class="screen" style="top: -203px;left: 1290px;"></div>
+    <input type="checkbox" id="run" checked="checked"></input>
+
+    <script data-main="scripts/main" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"
+        integrity="sha256-1fEPhSsRKlFKGfK3eO710tEweHh1fwokU5wFGDHO+vg=" crossorigin="anonymous"></script>
+</body>
+
+</html>
