@@ -85,7 +85,7 @@ define(function (require, exports, module) {
 			var x2 = pt.x + Math.trunc(polygon.bbw / 2);
 			var y1 = pt.y - Math.trunc(polygon.bbh / 2);
 			var y2 = pt.y + Math.trunc(polygon.bbh / 2);
-			
+
 			if (x1 > 319 || x2 < 0 || y1 > 199 || y2 < 0) {
 				//console.log(`fillPolygon() skipping - color: ${color}, zoom ${zoom}, x ${pt.x}, y ${pt.y}, x1 ${x1}, y1 ${y1}, x2 ${x2}, y2 ${y2}, bbw ${polygon.bbw}, bbh ${polygon.bbh}`);
 				return;
@@ -94,21 +94,21 @@ define(function (require, exports, module) {
 			var pl = `fillPolygon() - color: ${color}, zoom ${zoom}, x ${pt.x}, y ${pt.y}, x1 ${x1}, y1 ${y1}, x2 ${x2}, y2 ${y2}, bbw ${polygon.bbw}, bbh ${polygon.bbh}`;
 			//console.log(pl);
 
-			/*
-			if ( pl != polyLog[this.polyCount++]){
-				//console.log(polyLog[this.polyCount -1]);
-				debugger;
+			if (polygon.bbw == 0 && polygon.bbh == 1 && polygon.numPoints == 4) {
+				this.drawPoint(color, pt.x, pt.y);
+
+				return;
 			}
-*/
+
 			var polyDiv = document.createElement("div");
 			polyDiv.classList = `polygon color${color}`;
 			polyDiv.style = `left:${x1}; top:${y1};width:${polygon.bbw + 1}px; height:${polygon.bbh}px;`
 
 			if (polygon.bbw == 0 || polygon.bbh == 1) {
-				
-				
+
+
 			}
-			else{
+			else {
 				var polyPoints = new Array(polygon.numPoints);
 
 				// Poly coordinates assume max x is drawn, max y is not drawn.
@@ -118,164 +118,37 @@ define(function (require, exports, module) {
 				// First we need to determine which half of points is the right side.
 				// Cant just compare the first set of x values, because they're the same sometimes.
 				var firstHalfRight = true;
-				for (var i = polygon.numPoints/2; i < polygon.numPoints; ++i)
-				{	
+				for (var i = polygon.numPoints / 2; i < polygon.numPoints; ++i) {
 					var j = polygon.numPoints - i - 1;
-					if ( polygon.points[i].x > polygon.points[j].x ) {
-						firstHalfRight = false; 
-					}						
+					if (polygon.points[i].x > polygon.points[j].x) {
+						firstHalfRight = false;
+					}
 					break;
 				}
 
-				for (var i = 0; i < polygon.numPoints; ++i)
-				{
+				for (var i = 0; i < polygon.numPoints; ++i) {
+					var j = polygon.numPoints - i - 1;
 					var polyX = polygon.points[i].x;
 
-					if ( firstHalfRight && (i < (polygon.numPoints/2)) ) {
-						polyX++;
+					if (firstHalfRight && (i < (polygon.numPoints / 2))) {
+						// Only increase if it wouldnt create a twist
+						if ((polyX + 1) > polygon.points[j].x) {
+							polyX++;
+						}
 					}
-					else if ( !firstHalfRight && (i >= (polygon.numPoints/2)) ) {
-						polyX++;
-					}					
-					
+					else if (!firstHalfRight && (i >= (polygon.numPoints / 2))) {
+						// Only increase if it wouldnt create a twist
+						if ((polyX + 1) < polygon.points[j].x) {
+							polyX++;
+						}
+					}
+
 					polyPoints[i] = `${polyX}px ${polygon.points[i].y}px`
 				}
 				polyDiv.style.clipPath = `polygon(${polyPoints.join(',')})`
 			}
 			this._curPagePtr1.appendChild(polyDiv);
 			return;
-
-
-
-			/*
-			debug(1, "fillPolygon() - color: %u, zoom %u, x1 %d, y1 %d, x2 %d, y2 %d, bbw %d, bbh %d", (unsigned int)color, (unsigned int)zoom, (int)x1, (int)y1, (int)x2, (int)y2, (int)polygon.bbw, (int)polygon.bbh);
-			for (int x = 0; x < polygon.numPoints; ++x)
-			{
-				debug(1, "point[%d] - x %d, y %d", x, polygon.points[x].x, polygon.points[x].y);
-			}
-			*/
-			/*
-			char div[1000];
-		
-			int actualWidth = polygon.bbw + 1;
-		
-			int minx = 5000;
-			int maxx = -5000;
-			for (int x = 0; x < polygon.numPoints; ++x)
-			{
-				if (polygon.points[x].x < minx) minx = polygon.points[x].x;
-				if (polygon.points[x].x > maxx) maxx = polygon.points[x].x;
-			}
-			int actW2 = (maxx - minx) + 1;
-			if (actualWidth != actW2)
-			{
-				int g = 56;
-			}
-				
-		
-		
-			if (actualWidth <= 1 || polygon.bbh == 1)
-			{
-				// just create a rectangle div, since we're drawing a line (I assume)
-				//snprintf(div, 1000, "<div class=\"polygon color%d\" style=\"left:%.2f%%%%; top:%.2f%%%%; width:%.2f%%%%; height:%.2f%%%%;\"></div>", color, (x1 / 320.0 * 100.0), (y1 / 200.0 * 100.0), (actualWidth / 320.0 * 100.0), (polygon.bbh / 200.0 * 100.0));//;// 50 % 0px, 100 % 50 % , 50 % 100 % , 0px 50 % ); " / >"
-				snprintf(div, 1000, "<div class=\"polygon color%d\" style=\"left:%dpx; top:%dpx; width:%dpx; height:%dpx;\"></div>", color, x1, y1, actualWidth, polygon.bbh);
-		
-			}
-			else
-			{
-		
-				//snprintf(div, 1000, "<div class=\"polygon color%d\" style=\"left:%.2f%%%%; top:%.2f%%%%; width:%.2f%%%%; height:%.2f%%%%; clip-path: polygon(", color, (x1 / 320.0 * 100.0), (y1 / 200.0 * 100.0), (actualWidth / 320.0 * 100.0), (polygon.bbh / 200.0 * 100.0));//;// 50 % 0px, 100 % 50 % , 50 % 100 % , 0px 50 % ); " / >"
-				snprintf(div, 1000, "<div class=\"polygon color%d\" style=\"left:%dpx; top:%dpx; width:%dpx; height:%dpx; clip-path: polygon(", color, x1, y1, actualWidth, polygon.bbh);
-				for (int x = 0; x < polygon.numPoints; ++x)
-				{
-					int len = strlen(div);
-					int polyX = polygon.points[x].x;
-					if (x < polygon.numPoints / 2)
-					{
-						// Poly coordinates assume max x is drawn, max y is not drawn.
-						// ex: [[1,0],[1,1],[0,1],[0,0]] will draw a rectangle 2 pixels wide, 1 pixel tall
-						// So, extend the right side of the poly by 1 pixel to make sure it gets drawn
-						polyX++;
-					}
-					//snprintf(div + len, 1000 - len, "%.2f%%%% %.2f%%%%,", (polygon.points[x].x / (double)actualWidth * 100.0), (polygon.points[x].y / (double)polygon.bbh * 100.0));
-					snprintf(div + len, 1000 - len, "%dpx %dpx,", polyX, polygon.points[x].y);
-				}
-				snprintf(div + strlen(div) - 1, 1000 - strlen(div), ")\"></div>");
-			}
-			debug(DBG_DIV, div);
-		*/
-			if (polygon.bbw == 0 && polygon.bbh == 1 && polygon.numPoints == 4) {
-				this.drawPoint(color, pt.x, pt.y);
-
-				return;
-			}
-			/*
-				_hliney = y1;
-				
-				uint16_t i, j;
-				i = 0;
-				j = polygon.numPoints - 1;
-				
-				x2 = polygon.points[i].x + x1;
-				x1 = polygon.points[j].x + x1;
-			
-				++i;
-				--j;
-			
-				drawLine drawFct;
-				if (color < 0x10) {
-					drawFct = &Video::drawLineN;
-				} else if (color > 0x10) {
-					drawFct = &Video::drawLineP;
-				} else {
-					drawFct = &Video::drawLineBlend;
-				}
-			
-				uint32_t cpt1 = x1 << 16;
-				uint32_t cpt2 = x2 << 16;
-			
-				while (1) {
-					polygon.numPoints -= 2;
-					if (polygon.numPoints == 0) {
-						break;
-					}
-					uint16_t h;
-					int32_t step1 = calcStep(polygon.points[j + 1], polygon.points[j], h);
-					int32_t step2 = calcStep(polygon.points[i - 1], polygon.points[i], h);
-			
-					++i;
-					--j;
-			
-					cpt1 = (cpt1 & 0xFFFF0000) | 0x7FFF;
-					cpt2 = (cpt2 & 0xFFFF0000) | 0x8000;
-			
-					if (h == 0) {	
-						cpt1 += step1;
-						cpt2 += step2;
-					} else {
-						for (; h != 0; --h) {
-							if (_hliney >= 0) {
-								x1 = cpt1 >> 16;
-								x2 = cpt2 >> 16;
-								if (x1 <= 319 && x2 >= 0) {
-									if (x1 < 0) x1 = 0;
-									if (x2 > 319) x2 = 319;
-									(this->*drawFct)(x1, x2, color);
-								}
-							}
-							cpt1 += step1;
-							cpt2 += step2;
-							++_hliney;					
-							if (_hliney > 199) return;
-						}
-					}
-				}
-				*/
-
-
-
-
-
 		}
 
 		/*
@@ -301,7 +174,7 @@ define(function (require, exports, module) {
 				po.x += this._dataBuf.readZoomedCoord(zoom);
 				po.y += this._dataBuf.readZoomedCoord(zoom);
 
-				if ( po.x > 30768){
+				if (po.x > 30768) {
 					debugger;
 				}
 
@@ -325,57 +198,51 @@ define(function (require, exports, module) {
 
 
 		}
-		/*
-		int32_t Video::calcStep(const Point &p1, const Point &p2, uint16_t &dy) {
-			dy = p2.y - p1.y;
-			return (p2.x - p1.x) * _interpTable[dy] * 4;
-		}
-		*/
-		
+
 		drawString(/*uint8_t*/ color, /*uint16_t*/ x, /*uint16_t*/ y, /*uint16_t*/ stringId) {
-		
+
 			var str = staticRes.stringsTableEng[stringId];
-			
+
 			//console.log(`drawString(${color}, ${x}, ${y}, ${stringId}, ${str}`);
-		
+
 			//Used if the string contains a return carriage.
 			var xOrigin = x;
 			var len = str.length;
 			for (var i = 0; i < len; ++i) {
-		
+
 				if (str[i] == '\n') {
 					y += 8;
 					x = xOrigin;
 					continue;
-				} 
-				
+				}
+
 				this.drawChar(str[i], x, y, color, this._curPagePtr1);
 				x++;
-				
+
 			}
 		}
-		
+
 		drawChar(/*uint8_t*/ character, /*uint16_t*/ x, /*uint16_t*/ y, /*uint8_t*/ color, /*uint8_t **/buf) {
 			if (x <= 39 && y <= 192) {
-				
+
 				var fontPos = (character.charCodeAt(0) - ' '.charCodeAt(0)) * 8;
-		
+
 				for (var j = 0; j < 8; ++j) {
-					var ch = staticRes.font[fontPos + j];					
+					var ch = staticRes.font[fontPos + j];
 					for (var i = 0; i < 4; ++i) {
-						if(ch & 0x80){
-							this.drawPoint(color, (x*8) + (i*2), y+j);
+						if (ch & 0x80) {
+							this.drawPoint(color, (x * 8) + (i * 2), y + j);
 						}
 						ch = (ch << 1) >>> 0;
-						if(ch & 0x80){
-							this.drawPoint(color, (x*8) + (i*2) + 1, y+j);
+						if (ch & 0x80) {
+							this.drawPoint(color, (x * 8) + (i * 2) + 1, y + j);
 						}
 						ch = (ch << 1) >>> 0;
 					}
 				}
 			}
 		}
-		
+
 		drawPoint(color, x, y) {
 			//console.log(`drawPoint(${color}, ${x}, ${y})`);
 
@@ -631,8 +498,7 @@ define(function (require, exports, module) {
 
 			var paletteCss = ""
 			var NUM_COLORS = 16
-			for (var i = 0; i < NUM_COLORS; ++i)
-			{
+			for (var i = 0; i < NUM_COLORS; ++i) {
 				var c1 = this.res.segPalettes.readByte();
 				var c2 = this.res.segPalettes.readByte();
 				var r = (((c1 & 0x0F) << 2) | ((c1 & 0x0F) >> 2)) << 2; // r
@@ -673,11 +539,11 @@ define(function (require, exports, module) {
 				this.paletteIdRequested = NO_PALETTE_CHANGE_REQUESTED;
 			}
 
-				var dst = document.getElementById("currentScreen");
+			var dst = document.getElementById("currentScreen");
 
-				var clone = this._curPagePtr2.cloneNode(true);
-				dst.textContent = '';
-				dst.append(...clone.children);
+			var clone = this._curPagePtr2.cloneNode(true);
+			dst.textContent = '';
+			dst.append(...clone.children);
 
 			/*
 				
